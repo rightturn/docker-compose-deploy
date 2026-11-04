@@ -11,7 +11,7 @@ The app itself is deliberately tiny (a Node.js JSON service). The point is the d
 - **Multi-service Compose stack:** app + nginx reverse proxy, started in the right order
   (`depends_on` with a health condition).
 - **Container hardening:** non-root user, read-only filesystem, all Linux capabilities dropped,
-  `no-new-privileges`, pinned base images.
+  `no-new-privileges`, version-tagged base images.
 - **Health checks** at the image level (`HEALTHCHECK`) and at the edge (`/health` through nginx).
 - **Safe deploys:** `scripts/deploy.sh` fetches the target commit, rebuilds, waits for `/health`,
   and **rolls back to the previous commit automatically** if the new version is not healthy.
