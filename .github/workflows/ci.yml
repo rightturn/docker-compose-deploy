@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Unit tests
+        run: npm test
+        working-directory: app
+
+      - name: Lint the deploy script
+        run: bash -n scripts/deploy.sh
+
+      - name: Build and start the stack
+        run: docker compose up -d --build
+        env:
+          HTTP_PORT: 8080
+
+      - name: Smoke test through nginx
+        run: |
+          for i in $(seq 1 20); do
+            curl -fsS http://localhost:8080/health && exit 0
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
